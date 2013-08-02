@@ -96,12 +96,9 @@ EPUBcfi.CFIInstructions = {
 	//   the found node. 
 	targetIdMatchesIdAssertion : function ($foundNode, idAssertion) {
 
-		if ($foundNode.attr("id") === idAssertion) {
-
+		if ($foundNode.attr("id") === idAssertion || $foundNode.attr("idref") === idAssertion) {
 			return true;
-		}
-		else {
-
+		} else {
 			return false;
 		}
 	},
