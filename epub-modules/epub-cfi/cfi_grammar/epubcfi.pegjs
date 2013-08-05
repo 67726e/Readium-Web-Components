@@ -166,11 +166,14 @@ escapedSpecialChars
 //    }
 
 number
-	= integerValue:([0-9]+) "."? decimalValue:([0-9]+)? {
+	= integerValue:([0-9]+) "." decimalValue:([0-9]+) {
 		if (decimalValue) {
 			return (integerValue.join("") + "." + decimalValue.join(""));
 		}
 
+		return integerValue.join("");
+	}
+	/ integerValue:([0-9]+) {
 		return integerValue.join("");
 	}
 

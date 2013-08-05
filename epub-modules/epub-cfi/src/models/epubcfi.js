@@ -1106,7 +1106,6 @@ EPUBcfi.Parser = (function(){
               matchFailed("\".\"");
             }
           }
-          result1 = result1 !== null ? result1 : "";
           if (result1 !== null) {
             if (/^[0-9]/.test(input.charAt(pos))) {
               result3 = input.charAt(pos);
@@ -1134,7 +1133,6 @@ EPUBcfi.Parser = (function(){
             } else {
               result2 = null;
             }
-            result2 = result2 !== null ? result2 : "";
             if (result2 !== null) {
               result0 = [result0, result1, result2];
             } else {
@@ -1160,6 +1158,43 @@ EPUBcfi.Parser = (function(){
         }
         if (result0 === null) {
           pos = pos0;
+        }
+        if (result0 === null) {
+          pos0 = pos;
+          if (/^[0-9]/.test(input.charAt(pos))) {
+            result1 = input.charAt(pos);
+            pos++;
+          } else {
+            result1 = null;
+            if (reportFailures === 0) {
+              matchFailed("[0-9]");
+            }
+          }
+          if (result1 !== null) {
+            result0 = [];
+            while (result1 !== null) {
+              result0.push(result1);
+              if (/^[0-9]/.test(input.charAt(pos))) {
+                result1 = input.charAt(pos);
+                pos++;
+              } else {
+                result1 = null;
+                if (reportFailures === 0) {
+                  matchFailed("[0-9]");
+                }
+              }
+            }
+          } else {
+            result0 = null;
+          }
+          if (result0 !== null) {
+            result0 = (function(offset, integerValue) {
+          		return integerValue.join("");
+          	})(pos0, result0);
+          }
+          if (result0 === null) {
+            pos = pos0;
+          }
         }
         return result0;
       }
