@@ -1066,7 +1066,7 @@ EPUBcfi.Parser = (function(){
       
       function parse_number() {
         var result0, result1, result2, result3;
-        var pos0, pos1, pos2;
+        var pos0, pos1;
         
         pos0 = pos;
         pos1 = pos;
@@ -1097,7 +1097,6 @@ EPUBcfi.Parser = (function(){
           result0 = null;
         }
         if (result0 !== null) {
-          pos2 = pos;
           if (input.charCodeAt(pos) === 46) {
             result1 = ".";
             pos++;
@@ -1107,6 +1106,7 @@ EPUBcfi.Parser = (function(){
               matchFailed("\".\"");
             }
           }
+          result1 = result1 !== null ? result1 : "";
           if (result1 !== null) {
             if (/^[0-9]/.test(input.charAt(pos))) {
               result3 = input.charAt(pos);
@@ -1134,19 +1134,13 @@ EPUBcfi.Parser = (function(){
             } else {
               result2 = null;
             }
+            result2 = result2 !== null ? result2 : "";
             if (result2 !== null) {
-              result1 = [result1, result2];
+              result0 = [result0, result1, result2];
             } else {
-              result1 = null;
-              pos = pos2;
+              result0 = null;
+              pos = pos1;
             }
-          } else {
-            result1 = null;
-            pos = pos2;
-          }
-          result1 = result1 !== null ? result1 : "";
-          if (result1 !== null) {
-            result0 = [result0, result1];
           } else {
             result0 = null;
             pos = pos1;
@@ -1158,11 +1152,11 @@ EPUBcfi.Parser = (function(){
         if (result0 !== null) {
           result0 = (function(offset, integerValue, decimalValue) {
         		if (decimalValue) {
-        			return (integerValue + decimalValue);
+        			return (integerValue.join("") + "." + decimalValue.join(""));
         		}
         
-        		return integerValue;
-        	})(pos0, result0[0], result0[1]);
+        		return integerValue.join("");
+        	})(pos0, result0[0], result0[2]);
         }
         if (result0 === null) {
           pos = pos0;
