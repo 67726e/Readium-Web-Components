@@ -21,6 +21,9 @@ var EpubCFIModule = function () {
         injectElement : function (CFI, contentDocument, elementToInject, classBlacklist, elementBlacklist, idBlacklist) {
             return interpreter.injectElement(CFI, contentDocument, elementToInject, classBlacklist, elementBlacklist, idBlacklist);
         },
+		getTerminalStep : function(CFI) {
+			return interpreter.getTerminalStep(CFI);
+		},
         getTargetElement : function (CFI, contentDocument, classBlacklist, elementBlacklist, idBlacklist) {
             return interpreter.getTargetElement(CFI, contentDocument, classBlacklist, elementBlacklist, idBlacklist);
         },

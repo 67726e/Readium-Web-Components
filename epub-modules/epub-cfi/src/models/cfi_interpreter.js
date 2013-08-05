@@ -109,6 +109,12 @@ EPUBcfi.Interpreter = {
         };
     },
 
+	getTerminalStep : function(CFI) {
+		var CFIAST = EPUBcfi.Parser.parse(decodeURI(CFI));
+
+		return CFIAST.cfiString.localPath.termStep;
+	},
+
     // Description: This method will return the element or node (say, a text node) that is the final target of the 
     //   the CFI.
     getTargetElement : function (CFI, contentDocument, classBlacklist, elementBlacklist, idBlacklist) {
