@@ -276,17 +276,18 @@ EpubReader.EpubReader = Backbone.Model.extend({
     // REFACTORING CANDIDATE: This method should be replaced when the epub reader api is changed to have an 
     //   instantiated epub module passed to it. 
     findSpineIndex : function (contentDocumentHref) {
-    	var contentDocURI = new URI(contentDocumentHref);
-        var foundSpineItem;
+		var $packageDocument = $(packageDocumentDOM);
 
-        foundSpineItem = _.find(this.get("spine"), function (spineItem, index) { 
-			// As a heuristic (for the moment) just assume same filenames means same file and thus index
-			// TODO: Fix this, it would totally break with same filenames in different directories
-			return (new URI(spineItem.contentDocumentURI).filename() === contentDocURI.filename());
-        });
+		var manifestId = $packageDocument.find("manifest").children("item").filter(function() {
+			return $(this).attr("href") === contentDocumentHref;
+		}).attr("id");
 
-        return foundSpineItem.spineIndex;
-    },
+		var $spineItem = $packageDocument.find("spine").children("itemref").filter(function() {
+			return $(this).attr("idref") === manifestId;
+		});
+
+		return $spineItem.index();
+	},
 
     getPagesViewInfo : function (spineIndex) {
 
