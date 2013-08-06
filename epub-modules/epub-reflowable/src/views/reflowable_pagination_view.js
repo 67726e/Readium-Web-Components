@@ -163,7 +163,10 @@ EpubReflowable.ReflowablePaginationView = Backbone.View.extend({
         var $rangeTargetElements;
         var $standardTargetElement;
         var targetElement;
+		var terminalStep;
+
         try {
+			terminalStep = this.cfi.getTerminalStep(CFI);
 
             // Check if it's a CFI range type
             if (new RegExp(/.+,.+,.+/).test(CFI)) {
@@ -192,12 +195,11 @@ EpubReflowable.ReflowablePaginationView = Backbone.View.extend({
             throw error;
         }
 
-        if (targetElement.nodeType === Node.TEXT_NODE) {
-            this.showPageByElement($(targetElement).parent()[0])
-        }
-        else {
-            this.showPageByElement(targetElement);
-        }
+		if (targetElement.nodeType === Node.TEXT_NODE) {
+			targetElement = $(targetElement).parent().get(0);
+		}
+
+		this.showPageByElementAndTerminalStep(targetElement, terminalStep);
     },
 
     showPageByElementId : function (elementId) {
@@ -403,24 +405,39 @@ EpubReflowable.ReflowablePaginationView = Backbone.View.extend({
 		);
 	},
 
-    showPageByElement : function (element) {
+	showPageByElementAndTerminalStep : function(element, terminalStep) {
+		if (terminalStep) {
+			switch (terminalStep.type) {
+				case "spatialTerminus":
+					this.showPageByElementAndSpatialStep(element, terminalStep);
+					return;
+				case "temporalTerminus":
+				case "temporalSpatialTerminus":
+					break;
+			}
+		}
 
+		this.showPageByElement(element);
+	},
+
+	showPageByElementAndSpatialStep : function(element, spatialStep) {
+		var pageNumber = this.reflowableElementsInfo.getPageNumberForElementAndSpatialStep(element, spatialStep,
+			this.offsetDirection(), this.reflowablePaginator.page_width, this.reflowablePaginator.frame_height,
+			this.reflowablePaginator.gap_width, this.getEpubContentDocument());
+
+		this.showPageByNumber(pageNumber);
+	},
+
+    showPageByElement : function (element) {
         var pageNumber = this.reflowableElementsInfo.getElemPageNumber(
-            element, 
-            this.offsetDirection(), 
-            this.reflowablePaginator.page_width, 
+            element,
+            this.offsetDirection(),
+            this.reflowablePaginator.page_width,
             this.reflowablePaginator.gap_width,
             this.getEpubContentDocument());
 
-        if (pageNumber > 0) {
-
-            this.pages.goToPage(pageNumber, this.viewerModel.get("syntheticLayout"), this.spineItemModel.get("firstPageIsOffset"));
-            this.showCurrentPages();
-        }
-        else {
-            // Throw an exception here 
-        }
-    },
+		this.showPageByNumber(pageNumber);
+	},
 
     showCurrentPages : function () {
 
@@ -437,6 +454,14 @@ EpubReflowable.ReflowablePaginationView = Backbone.View.extend({
         this.showContent();
         this.trigger("displayedContentChanged");
     },
+
+	showPageByPageNumber : function(pageNumber) {
+		if (pageNumber > 0) {
+			this.pages.goToPage(pageNumber, this.viewerModel.get("syntheticLayout"), this.spineItemModel.get("firstPageIsOffset"));
+		} else {
+			// I know this is crazy, and I just generated this value, but throw an exception, maybe?
+		}
+	},
 
     moveViewportToPage : function (pageNumber) {
 

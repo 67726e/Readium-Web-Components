@@ -7,8 +7,32 @@ EpubReflowable.ReflowableElementInfo = Backbone.Model.extend({
     //  "PUBLIC" METHODS (THE API)                                                          //
     // ------------------------------------------------------------------------------------ //
 
-    getElemPageNumber: function(elem, offsetDir, pageWidth, gapWidth, epubContentDocument) {
-        
+	getPageNumberForElementAndSpatialStep : function(element, spatialStep, offsetDirection, pageWidth, pageHeight, gapWidth, epubContentDocument) {
+		// Since we're in an iframe, the container is the "window"
+		var $element = $(element);
+		spatialStep.verticalOffset = parseFloat(spatialStep.verticalOffset);
+
+		// The current method figures out where the element is out horizontally based on page width and horizontal location
+		var pageNumber = this.getElemPageNumber(element, offsetDirection, pageWidth, gapWidth, epubContentDocument);
+
+		// We need to determine if the spatial offset causes the element to go below the viewport and thus on a new page
+		// For this we only really care about the vertical offset
+		var elementOffset = $element.offset();
+		var verticalPercent = spatialStep.verticalOffset / 100;
+		var verticalOffset = $element.height() * verticalPercent;
+		var pageOffset = Math.floor((verticalOffset + elementOffset.top) / pageHeight);
+
+		if (offsetDirection === "left") {
+			pageNumber += pageOffset;
+		} else if (offsetDirection === "right") {
+			pageNumber -= pageOffset;
+		}
+
+		return pageNumber;
+	},
+
+	getElemPageNumber: function(elem, offsetDir, pageWidth, gapWidth, epubContentDocument) {
+
         var $elem;
         var elemWasInvisible = false;
         var rects, shift;
