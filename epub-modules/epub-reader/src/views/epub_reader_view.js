@@ -92,7 +92,11 @@ EpubReader.EpubReaderView = Backbone.View.extend({
             this.showSpineItem(spineIndex, function () {
                 pagesView = this.reader.getCurrentPagesView();
                 pagesView.showPageByCFI(CFI);
-                callback.call(callbackContext);
+
+				// Only invoke the callback if one is actually provided
+				if (callback) {
+					callback.call(callbackContext);
+				}
             }, this);
         }
         catch (error) {
