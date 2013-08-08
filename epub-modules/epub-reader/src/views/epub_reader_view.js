@@ -114,6 +114,7 @@ EpubReader.EpubReaderView = Backbone.View.extend({
     },
 
     nextPage : function (callback, callbackContext) {
+		callback = callback || function() {};
 
         var that = this;
         var currentPagesView = this.reader.getCurrentPagesView();
@@ -144,6 +145,7 @@ EpubReader.EpubReaderView = Backbone.View.extend({
     },
 
     previousPage : function (callback, callbackContext) {
+		callback = callback || function() {};
 
         var that = this;
         var currentPagesView = this.reader.getCurrentPagesView();
