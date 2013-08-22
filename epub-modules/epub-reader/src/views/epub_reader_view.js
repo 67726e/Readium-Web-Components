@@ -80,23 +80,35 @@ EpubReader.EpubReaderView = Backbone.View.extend({
     // Rationale: As with the CFI library API, it is up to calling code to ensure that the content document CFI component is
     //   is a reference into the content document pointed to by the supplied spine index. 
     showPageByCFI : function (CFI, callback, callbackContext) {
+		callback = callback || function() {};
 
         // Dereference CFI, get the content document href
-        var contentDocHref;
+        var that = this;
+		var contentDocHref;
         var spineIndex;
         var pagesView;
         try {
-            
             contentDocHref = this.cfi.getContentDocHref(CFI, this.packageDocumentDOM);
             spineIndex = this.reader.findSpineIndex(contentDocHref);
             this.showSpineItem(spineIndex, function () {
                 pagesView = this.reader.getCurrentPagesView();
                 pagesView.showPageByCFI(CFI);
+				callback.call(callbackContext);
 
-				// Only invoke the callback if one is actually provided
-				if (callback) {
+				// RATIONALE: In FireFox (and thus likely all Gecko browsers) the first load of a spine item results
+				// in a page that is now flowed into columns. Subsequent switching between the given spine item and
+				// another spine item will cause the content to properly flow allowing content to render as expected.
+				// TODO: This is a total hack, but it works. The root cause of this issue needs to be addressed
+				this.reader.renderPagesView(1, function(pageView) {
+					pagesView.showPageByNumber(1);
 					callback.call(callbackContext);
-				}
+
+					that.showSpineItem(spineIndex, function() {
+						pagesView = that.reader.getCurrentPagesView();
+						pagesView.showPageByCFI(CFI);
+						callback.call(callbackContext);
+					});
+				});
             }, this);
         }
         catch (error) {

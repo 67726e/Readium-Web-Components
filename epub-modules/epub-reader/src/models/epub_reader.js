@@ -102,23 +102,52 @@ EpubReader.EpubReader = Backbone.Model.extend({
     },
 
     renderNextPagesView : function (callback, callbackContext) {
-
+		var that = this;
         var nextPagesViewIndex = this.get("currentPagesViewIndex") + 1;
-        this.renderPagesView(nextPagesViewIndex, function (pagesView) {
 
+        this.renderPagesView(nextPagesViewIndex, function (pagesView) {
             pagesView.showPageByNumber(1);
             callback.call(callbackContext);
+
+			// RATIONALE: In FireFox (and thus likely all Gecko browsers) the first load of a spine item results
+			// in a page that is now flowed into columns. Subsequent switching between the given spine item and
+			// another spine item will cause the content to properly flow allowing content to render as expected.
+			// TODO: This is a total hack, but it works. The root cause of this issue needs to be addressed
+			that.renderPagesView(1, function(pageView) {
+				pagesView.showPageByNumber(1);
+				callback.call(callbackContext);
+
+				that.renderPagesView(nextPagesViewIndex, function(pageView) {
+					pagesView.showPageByNumber(1);
+					callback.call(callbackContext);
+				});
+			});
         }, callbackContext);
     },
 
     renderPreviousPagesView : function (callback, callbackContext) {
-
+		var that = this;
         var previousPagesViewIndex = this.get("currentPagesViewIndex") - 1;
-        this.renderPagesView(previousPagesViewIndex, function (pagesView) {
 
+        this.renderPagesView(previousPagesViewIndex, function (pagesView) {
             pagesView.showPageByNumber(pagesView.numberOfPages());
             callback.call(callbackContext);
-        }, callbackContext);
+
+			// RATIONALE: In FireFox (and thus likely all Gecko browsers) the first load of a spine item results
+			// in a page that is now flowed into columns. Subsequent switching between the given spine item and
+			// another spine item will cause the content to properly flow allowing content to render as expected.
+			// TODO: This is a total hack, but it works. The root cause of this issue needs to be addressed
+			that.renderPagesView(1, function(pageView) {
+				pagesView.showPageByNumber(1);
+				callback.call(callbackContext);
+
+				that.renderPagesView(previousPagesViewIndex, function(pageView) {
+					pagesView.showPageByNumber(pagesView.numberOfPages());
+					callback.call(callbackContext);
+				});
+			});
+
+		}, callbackContext);
     },
 
     attachEventHandler : function (eventName, callback, callbackContext) {
