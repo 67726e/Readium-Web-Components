@@ -143,7 +143,9 @@ EpubReflowable.ReflowableLayout = Backbone.Model.extend({
 
     // Description: Inject mathML parsing code into the content document iframe
     injectMathJax : function (epubContentDocument) {
-
+		// TODO: This MathJax script probably shouldn't be loaded from oddly specific CDN URL
+		// TODO: Figure out why this randomly breaks shit
+return ;
         var script;
         var head;
         head = $("head", epubContentDocument)[0];
