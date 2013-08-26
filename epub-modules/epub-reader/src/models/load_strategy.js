@@ -6,6 +6,26 @@ EpubReader.LoadStrategy = Backbone.Model.extend({
 
     initialize : function (attributes, options) {},
 
+	getSpineIndexForUrl : function(targetUrl, currentUrl) {
+		var spineIndex = -1;
+
+		var currentUri = new URI(currentUrl);
+		var targetUri = new URI(targetUrl);
+		var targetUrl = targetUri.absoluteTo(currentUri).toString();
+
+		for (var i = 0; i < this.attributes.spineInfo.length; i++) {
+			var spineItem = this.attributes.spineInfo[i];
+			var contentDocumentURI = spineItem.contentDocumentURI;
+
+			if (contentDocumentURI === targetUrl) {
+				spineIndex = spineItem.spineIndex;
+				break;
+			}
+		}
+
+		return spineIndex;
+	},
+
     // Description: This method chooses the appropriate page view to load for individual 
     //   spine items, and sections of the spine. 
     loadSpineItems : function (viewerSettings, annotations, bindings) {
@@ -67,12 +87,34 @@ EpubReader.LoadStrategy = Backbone.Model.extend({
     },
 
     loadReflowablePagesView : function (spineItem, viewerSettings, annotations, bindings) {
-
-        var view = new EpubReflowableModule(
+        var that = this;
+		var view = new EpubReflowableModule(
             spineItem,
             viewerSettings, 
             annotations, 
-            bindings
+            bindings,
+			function(event) {
+				event.preventDefault();
+
+				var $target = $(event.currentTarget);
+				var targetUrl = $target.attr("href");
+				var uri = new URI(targetUrl);
+
+				// Only try to validate a link if the target element has an href
+				if (typeof targetUrl === "string") {
+					// We're assuming that a relative URL means an internal link to another spine item
+					// We should probably open absolute URLs in a new tab
+					if (uri.is("relative")) {
+						var spineIndex = that.getSpineIndexForUrl(targetUrl, spineItem.contentDocumentURI);
+
+						if (spineIndex >= 0) {
+							return epubReaderView.showSpineItem(spineIndex, function() {}, this);
+						}
+					}
+
+					return window.open(targetUrl, "_blank");
+				}
+			}
         );
 
         var pagesViewInfo = {

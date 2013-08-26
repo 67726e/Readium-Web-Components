@@ -1,6 +1,8 @@
-var EpubReflowableModule = function(spineObject, viewerSettingsObject, CFIAnnotations, bindings) {
+var EpubReflowableModule = function(spineObject, viewerSettingsObject, CFIAnnotations, bindings, linkCallback) {
 
-    var EpubReflowable = {};
+    var EpubReflowable = {
+		linkCallback: linkCallback || function() {}
+	};
 
     // Rationale: The order of these matters
     <%= alternate_style_tag_selector %>

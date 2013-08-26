@@ -20,12 +20,7 @@ EpubReflowable.ReflowableLayout = Backbone.Model.extend({
         triggers = this.parseTriggers(epubContentDocument);
         this.applyTriggers(epubContentDocument, triggers);
         $(epubContentDocument).attr('title');
-
-        this.injectKeydownHandler(
-            readiumFlowingContent, 
-            keydownHandler, 
-            handlerContext
-        );
+        this.injectKeydownHandler(readiumFlowingContent, keydownHandler, handlerContext);
     },
 
     // ------------------------------------------------------------------------------------ //
