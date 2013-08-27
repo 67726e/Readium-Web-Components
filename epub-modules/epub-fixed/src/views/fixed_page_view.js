@@ -149,10 +149,12 @@ EpubFixed.FixedPageView = Backbone.View.extend({
     },
 
     injectLinkHandler : function ($iframe, linkClickHandler, handlerContext) {
+		var linkCallback = EpubFixed.linkCallbackGenerator($iframe.attr("src"));
 
-        var that = this;
-        $('a', $iframe).on("click", function (e) {
-            linkClickHandler.call(handlerContext, e);
-        });
+		$iframe.contents().find("a").click(function(event) {
+			console.log("Clicked");
+			linkClickHandler.call(handlerContext, event);
+			linkCallback(event);
+		});
     }
 });

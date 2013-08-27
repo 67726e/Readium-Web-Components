@@ -26,6 +26,34 @@ EpubReader.LoadStrategy = Backbone.Model.extend({
 		return spineIndex;
 	},
 
+	generateLinkClickCallback: function(currentUrl) {
+		// Ensure the callback is executed in the context of `this`
+		return $.proxy(function(event) {
+			event.preventDefault();
+
+			var $target = $(event.currentTarget);
+			var targetUrl = $target.attr("href");
+			var uri = new URI(targetUrl);
+
+			// Only try to validate a link if the target element has an href
+			if (typeof targetUrl === "string") {
+				// We're assuming that a relative URL means an internal link to another spine item
+				// We should probably open absolute URLs in a new tab
+				if (uri.is("relative")) {
+					var spineIndex = this.getSpineIndexForUrl(targetUrl, currentUrl);
+
+					if (spineIndex >= 0) {
+						return epubReaderView.showSpineItem(spineIndex, function() {}, this);
+					}
+				}
+
+				return window.open(targetUrl, "_blank");
+			}
+
+			return undefined;
+		}, this);
+	},
+
     // Description: This method chooses the appropriate page view to load for individual 
     //   spine items, and sections of the spine. 
     loadSpineItems : function (viewerSettings, annotations, bindings) {
@@ -87,34 +115,12 @@ EpubReader.LoadStrategy = Backbone.Model.extend({
     },
 
     loadReflowablePagesView : function (spineItem, viewerSettings, annotations, bindings) {
-        var that = this;
 		var view = new EpubReflowableModule(
             spineItem,
             viewerSettings, 
             annotations, 
             bindings,
-			function(event) {
-				event.preventDefault();
-
-				var $target = $(event.currentTarget);
-				var targetUrl = $target.attr("href");
-				var uri = new URI(targetUrl);
-
-				// Only try to validate a link if the target element has an href
-				if (typeof targetUrl === "string") {
-					// We're assuming that a relative URL means an internal link to another spine item
-					// We should probably open absolute URLs in a new tab
-					if (uri.is("relative")) {
-						var spineIndex = that.getSpineIndexForUrl(targetUrl, spineItem.contentDocumentURI);
-
-						if (spineIndex >= 0) {
-							return epubReaderView.showSpineItem(spineIndex, function() {}, this);
-						}
-					}
-
-					return window.open(targetUrl, "_blank");
-				}
-			}
+			$.proxy(this.generateLinkClickCallback(spineItem.contentDocumentURI), this)
         );
 
         var pagesViewInfo = {
@@ -128,10 +134,10 @@ EpubReader.LoadStrategy = Backbone.Model.extend({
     },
 
     loadFixedPagesView : function (spineItemList, viewerSettings) {
-
         var view = new EpubFixedModule(
             spineItemList,
-            viewerSettings
+            viewerSettings,
+			$.proxy(this.generateLinkClickCallback, this)
         );
 
         var spineIndexes = [];

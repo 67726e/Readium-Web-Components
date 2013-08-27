@@ -1,6 +1,8 @@
-var EpubFixedModule = function (spineObjects, viewerSettingsObject) {
+var EpubFixedModule = function (spineObjects, viewerSettingsObject, linkCallbackGenerator) {
 
-    var EpubFixed = {};
+    var EpubFixed = {
+		linkCallbackGenerator: linkCallbackGenerator || function() {}
+	};
 
     // Rationale: The order of these matters
     <%= fixed_page_number_logic %>

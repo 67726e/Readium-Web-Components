@@ -1,268 +1,151 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <!--<link rel="stylesheet" type="text/css" href="../css/more_styles.css">-->
-        <link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css">
+	<head>
+		<link rel="stylesheet" type="text/css" href="../css/more_styles.css">
+		<link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css">
 
-        <script src="../lib/jquery-1.9.1.js" type="text/javascript"></script>
-        <script src="../lib/modernizr-2.5.3.min.js" type="text/javascript"></script>
-        <script src="../lib/json2.js" type="text/javascript"></script>
-        <script src="../lib/underscore-1.4.4.js" type="text/javascript"></script>
-        <script src="../lib/backbone-0.9.10.js" type="text/javascript"></script>
-        <script src="../lib/URI-1.10.0.js" type="text/javascript"></script>
-		
-        <script src="../lib/epub_reflowable_module.js" type="text/javascript"></script>
-        <script src="../lib/epub_reader_module.js" type="text/javascript"></script>
-        <script src="../lib/epub_fixed_module.js" type="text/javascript"></script>
-        <script src="../lib/epub_parser_module.js" type="text/javascript"></script>
-        <script src="../lib/epub_module.js" type="text/javascript"></script>
-        <script src="../lib/epub_cfi.js" type="text/javascript"></script>
-        <script src="../lib/epub_reading_system.js" type="text/javascript"></script>
-        
+		<script src="../lib/jquery-1.9.1.js" type="text/javascript"></script>
+		<script src="../lib/modernizr-2.5.3.min.js" type="text/javascript"></script>
+		<script src="../lib/json2.js" type="text/javascript"></script>
+		<script src="../lib/underscore-1.4.4.js" type="text/javascript"></script>
+		<script src="../lib/backbone-0.9.10.js" type="text/javascript"></script>
+		<script src="../lib/URI-1.10.0.js" type="text/javascript"></script>
+
+		<script src="../lib/epub_reflowable_module.js" type="text/javascript"></script>
+		<script src="../lib/epub_reader_module.js" type="text/javascript"></script>
+		<script src="../lib/epub_fixed_module.js" type="text/javascript"></script>
+		<script src="../lib/epub_parser_module.js" type="text/javascript"></script>
+		<script src="../lib/epub_module.js" type="text/javascript"></script>
+		<script src="../lib/epub_cfi.js" type="text/javascript"></script>
+		<script src="../lib/epub_reading_system.js" type="text/javascript"></script>
+
 		<script src="../lib/SimpleReadium_Dev.js" type="text/javascript"></script>
 
 		<script src="initialize_rjs_reader.js" type="text/javascript"></script>
-        <script src="event_handling.js" type="text/javascript"></script>
-
-		<script src="../lib/jath.js" type="text/javascript"></script>
-
+		<script src="event_handling.js" type="text/javascript"></script>
 
 		<script type="text/javascript">
-			PackageXmlToJson = {
-				metadata:  {
-					id: "//def:metadata/dc:identifier",
-					epub_version: "//def:package/@version",
-					title: "//def:metadata/dc:title",
-					author: "//def:metadata/dc:creator",
-					publisher: "//def:metadata/dc:publisher",
-					description: "//def:metadata/dc:description",
-					rights: "//def:metadata/dc:rights",
-					language: "//def:metadata/dc:language",
-					pubdate: "//def:metadata/dc:date",
-					modified_date: "//def:metadata/def:meta[@property='dcterms:modified']",
-					layout: "//def:metadata/def:meta[@property='rendition:layout']",
-					spread: "//def:metadata/def:meta[@property='rendition:spread']",
-					orientation: "//def:metadata/def:meta[@property='rendition:orientation']",
-					ncx: "//def:spine/@toc",
-					page_prog_dir: "//def:spine/@page-progression-direction",
-					active_class: "//def:metadata/def:meta[@property='media:active-class']"
-				},
-				manifest: [ "//def:item", {
-					id: "@id",
-					href: "@href",
-					media_type: "@media-type",
-					properties: "@properties",
-					media_overlay: "@media-overlay"
-				} ],
-				spine: [ "//def:itemref", { idref: "@idref", properties: "@properties", linear: "@linear" } ],
-				bindings: ["//def:bindings/def:mediaType", {
-					handler: "@handler",
-					media_type: "@media-type"
-				} ]
-			};
 
-			Jath.resolver = function(prefix) {
-				var mappings = {
-					def: "http://www.idpf.org/2007/opf",
-					dc: "http://purl.org/dc/elements/1.1/"
+			$(document).ready(function () {
+
+				// Create an object of viewer preferences
+				RJSDemoApp.viewerPreferences = {
+					fontSize : 12,
+					syntheticLayout : false,
+					currentMargin : 0,
+					tocVisible : false,
+					currentTheme : "default",
+					libraryIsVisible : true,
+					tocIsVisible : false,
+					day : true
 				};
 
-				return mappings[prefix];
-			};
+				// Load Moby Dick by default
+				RJSDemoApp.loadAndRenderEpub("../epub_samples_project/moby-dick-20120118/OPS/package.opf", RJSDemoApp.viewerPreferences);
 
-			function getCurrentIframe() {
-				return $("iframe").filter(":visible");
-			}
+				// Generate the library
+				$.getJSON('../available_epubs/epub_library_info.json', function (data) {
 
-			function getSpineIndex() {
-				return RJSDemoApp.epub.getSpineIndexByHref(getCurrentIframe().attr("src"));
-			}
+					// Generate the library list in a drop-down
+					RJSDemoApp.addLibraryList($("#library-list"), data);
+				}).fail(function (result) {
+							console.log("The library could not be loaded");
+						});
+			});
 
-			function transformPackageXmlToJson(packageXml) {
-				var packageDocument = new DOMParser().parseFromString(packageXml, "text/xml");
+			// Note: the epubReadingSystem object may not be ready when directly using the
+			// window.onload callback function (from within an (X)HTML5 EPUB3 content document's Javascript code)
+			// To address this issue, the recommended code is:
+			// -----
+			function doSomething() { console.log(navigator.epubReadingSystem); };
+			//
+			// // With jQuery:
+			// $(document).ready(function () { setTimeout(doSomething, 200); });
+			//
+			// // With the window "load" event:
+			// window.addEventListener("load", function () { setTimeout(doSomething, 200); }, false);
+			//
+			// // With the modern document "DOMContentLoaded" event:
+			document.addEventListener("DOMContentLoaded", function(e) { setTimeout(doSomething, 200); }, false);
+			// -----
+		</script>
+	</head>
+	<body>
+		<!-- The navbar -->
+		<div class="navbar navbar-fixed-top" id="toolbar-el">
+			<div class="navbar-inner" id="top-bar" style="">
+				<div class="container" style="width:100%">
 
-				return Jath.parse(PackageXmlToJson, packageDocument);
-			}
+					<!-- library-specific contents -->
+					<ul class="nav">
 
-			function findFirstVisibleElement() {
-				var $iframe = getCurrentIframe();
-				var $element = undefined;
-
-				// Find all elements and text nodes, then pick the first image or populated text node
-				$iframe.contents().find("body").find("*").contents().each(function() {
-					if (this.nodeType === Node.TEXT_NODE) {
-						// Only choose a text node that contains text and not just whitespace
-						if (this.nodeValue.trim().length > 0) {
-							$element = $(this).parent();
-						}
-					} else if (this.nodeName.toLowerCase() === "img") {
-						$element = $(this);
-					}
-
-					// Only continue iterating if we have not found a suitable element
-					return !$element;
-				});
-
-				return $element;
-			}
-
-			function generateCfi() {
-				var $element = findFirstVisibleElement();
-
-				if (!$element) {
-					return undefined;
-				}
-
-				var packageCfi = new EpubCFIModule().generatePackageDocumentCFIComponentWithSpineIndex(getSpineIndex(), packageXml);
-				var elementCfi = new EpubCFIModule().generateElementCFIComponent($element.get(0));
-
-				return new EpubCFIModule().generateCompleteCFI(packageCfi, elementCfi);
-			}
-
-            $(document).ready(function () {
-				// Default to Moby Dick
-				var PACKAGE_FILE = "../epub_samples_project/moby-dick-20120118/OPS/package.opf";
-
-                // Create an object of viewer preferences
-                RJSDemoApp.viewerPreferences = {
-                    fontSize : 12,
-                    syntheticLayout : false,
-                    currentMargin : 0,
-                    tocVisible : false,
-                    currentTheme : "default",
-                    libraryIsVisible : true,
-                    tocIsVisible : false,
-                    day : true
-                };
-
-                RJSDemoApp.loadAndRenderEpub(PACKAGE_FILE, RJSDemoApp.viewerPreferences);
-
-				$.get(PACKAGE_FILE, "", function(data) {
-window.packageXml = data;
-					var packageJson = transformPackageXmlToJson(data);
-window.packageJson = packageJson;
-
-					console.log(packageJson);
-				}, "text");
-            });
-			
-            // Note: the epubReadingSystem object may not be ready when directly using the
-            // window.onload callback function (from within an (X)HTML5 EPUB3 content document's Javascript code)
-            // To address this issue, the recommended code is:
-            // -----
-            function doSomething() { console.log(navigator.epubReadingSystem); };
-            // 
-            // // With jQuery:
-            // $(document).ready(function () { setTimeout(doSomething, 200); });
-            // 
-            // // With the window "load" event:
-            // window.addEventListener("load", function () { setTimeout(doSomething, 200); }, false);
-            // 
-            // // With the modern document "DOMContentLoaded" event:
-            document.addEventListener("DOMContentLoaded", function(e) { setTimeout(doSomething, 200); }, false);
-            // -----
-        </script>
-    </head>
-    <body>
-        <!-- The navbar -->
-        <div class="navbar navbar-fixed-top" id="toolbar-el">
-            <div class="navbar-inner" id="top-bar" style="">
-                <div class="container" style="width:100%">
-
-                    <!-- library-specific contents -->
-                    <ul class="nav">
-                    
-                        <!-- Library -->
-                        <li class="navbar-el pull-left">
-                            <a accesskey="t" href="#" id="library-btn" role="button" title="TOC">
-                                Library
-                            </a>
-                        </li>
-                    </ul>
-
-                    <!-- epub-specific navbar contents -->
-                    <ul class="nav pull-right">
-
-                        <!-- Table of contents -->
-                        <li class="navbar-el">
-                            <a accesskey="t" href="#" id="toc-btn" role="button" title="TOC">
-                                TOC
-                            </a>
-                        </li>
-
-						<li class="divider-vertical"></li>
-
-						<!-- Set Bookmark -->
-						<li class="navbar-el">
-							<a accesskey="#" href="#" id="set-bookmark-btn" role="button" title="Set Bookmark">#</a>
+						<!-- Library -->
+						<li class="navbar-el pull-left">
+							<a accesskey="t" href="#" id="library-btn" role="button" title="TOC">
+								Library
+							</a>
 						</li>
+					</ul>
 
-						<!-- Go to Bookmark-->
+					<!-- epub-specific navbar contents -->
+					<ul class="nav pull-right">
+
+						<!-- Table of contents -->
 						<li class="navbar-el">
-							<a accesskey="@" href="#" id="go-to-bookmark-btn" role="button" title="Go to Bookmark">@</a>
+							<a accesskey="t" href="#" id="toc-btn" role="button" title="TOC">
+								TOC
+							</a>
 						</li>
 
 						<li class="divider-vertical"></li>
 
-						<!-- Decrease Font Size -->
+						<!-- Previous page -->
 						<li class="navbar-el">
-							<a accesskey="-" href="#" id="decrease-font-btn" role="button" title="Decrease Font Size">-</a>
+							<a accesskey="p" href="#" id="previous-page-btn" role="button" title="Previous Page">
+								&lt;--
+							</a>
 						</li>
-
-						<!-- Increase Font Size -->
+						<!-- Next page -->
 						<li class="navbar-el">
-							<a accesskey="+" href="#" id="increase-font-btn" role="button" title="Increase Font Size">+</a>
+							<a accesskey="n" href="#" id="next-page-btn" role="button" title="Next Page">
+								--&gt;
+							</a>
 						</li>
 
 						<li class="divider-vertical"></li>
 
-                        <!-- Previous page -->
-                        <li class="navbar-el">
-                            <a accesskey="p" href="#" id="previous-page-btn" role="button" title="Previous Page">
-                                &lt;--
-                            </a>
-                        </li>
-                        <!-- Next page -->
-                        <li class="navbar-el">
-                            <a accesskey="n" href="#" id="next-page-btn" role="button" title="Next Page">
-                                --&gt;
-                            </a>
-                        </li>
-                        
-                        <li class="divider-vertical"></li>
-                        
-                        <!-- Toggle single or two pages -->
-                        <li class="navbar-el">
-                            <a accesskey="n" href="#" id="toggle-synthetic-btn" role="button" title="Toggle page layout">
-                                Toggle layout
-                            </a>
-                        </li>
+						<!-- Toggle single or two pages -->
+						<li class="navbar-el">
+							<a accesskey="n" href="#" id="toggle-synthetic-btn" role="button" title="Toggle page layout">
+								Toggle layout
+							</a>
+						</li>
 
-                        <!-- Toggle alternate styles -->
-                        <li class="navbar-el">
-                            <a accesskey="n" href="#" id="toggle-ast-btn" role="button" title="Toggle AST">
-                                Toggle AST
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+						<!-- Toggle alternate styles -->
+						<li class="navbar-el">
+							<a accesskey="n" href="#" id="toggle-ast-btn" role="button" title="Toggle AST">
+								Toggle AST
+							</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
 
-        <div class="container-fluid" style="margin-top:45px">
-            <div class="row-fluid">
-                <!--<div id="library-panel" class="span4 sidebar">-->
-                    <!--<ul id="library-list" role="menu" aria-labelledby="dlabel" style="height:700px">-->
-                    <!--</ul>-->
-                <!--</div>-->
-                <!--<div id="toc-panel" class="span4 sidebar" style="display:none;height:700px;margin:0px">-->
-                    <!--<iframe id="toc-iframe" src="" style="height:100%;width:100%;border-style:none"></iframe>-->
-                <!--</div>-->
-                <div id="reader-panel" class="span12">
-                    <div id="reader" style="height:700px">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </body>
+		<div class="container-fluid" style="margin-top:45px">
+			<div class="row-fluid">
+				<div id="library-panel" class="span4 sidebar">
+					<ul id="library-list" role="menu" aria-labelledby="dlabel" style="height:700px">
+					</ul>
+				</div>
+				<div id="toc-panel" class="span4 sidebar" style="display:none;height:700px;margin:0px">
+					<iframe id="toc-iframe" src="" style="height:100%;width:100%;border-style:none"></iframe>
+				</div>
+				<div id="reader-panel" class="span8">
+					<div id="reader" style="height:700px">
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
 </html>
