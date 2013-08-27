@@ -177,7 +177,7 @@ EpubReflowable.ReflowablePaginationView = Backbone.View.extend({
                     [],
                     ["MathJax_Message"]
                 );
-                targetElement = $rangeTargetElements[0];
+                targetElement = $rangeTargetElements.startElement;
             }
             else {
                 $standardTargetElement = this.cfi.getTargetElement(
