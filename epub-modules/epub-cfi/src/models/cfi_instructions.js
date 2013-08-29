@@ -141,42 +141,31 @@ EPUBcfi.CFIInstructions = {
 	//   is required. This is obtained with the jquery parent() method. An alternative would be to 
 	//   pass in the parent with a filtered list containing only children that are part of the target text node.
 	injectCFIMarkerIntoText : function ($textNodeList, textOffset, elementToInject) {
+		var currentTextPosition = 0;
 
-		var nodeNum;
-		var currNodeLength;
-		var currTextPosition = 0;
-		var nodeOffset;
-		var originalText;
-		var $injectedNode;
-		var $newTextNode;
-		// The iteration counter may be incorrect here (should be $textNodeList.length - 1 ??)
-		for (nodeNum = 0; nodeNum <= $textNodeList.length; nodeNum++) {
+		for (var i = 0; i < $textNodeList.size(); i++) {
+			var node = $textNodeList.get(i);
 
-			if ($textNodeList[nodeNum].nodeType === 3) {
+			if (node.nodeType === Node.TEXT_NODE) {
+				var endTextPosition = node.nodeValue.length + currentTextPosition;
 
-				currNodeMaxIndex = ($textNodeList[nodeNum].nodeValue.length - 1) + currTextPosition;
-				nodeOffset = textOffset - currTextPosition;
+				// Our target location is within this text node, we'll need to break it up
+				if (endTextPosition >= textOffset) {
+					var originalText = node.nodeValue;
+					// Calculate the offset within the node itself
+					var nodeOffset = textOffset - currentTextPosition;
 
-				if (currNodeMaxIndex >= textOffset) {
-
-					// This node is going to be split and the components re-inserted
-					originalText = $textNodeList[nodeNum].nodeValue;	
-
-					// Before part
-				 	$textNodeList[nodeNum].nodeValue = originalText.slice(0, nodeOffset);
-
-					// Injected element
-					$injectedNode = $(elementToInject).insertAfter($textNodeList.eq(nodeNum));
-
-					// After part
-					$newTextNode = $(document.createTextNode(originalText.slice(nodeOffset, originalText.length)));
-					$($newTextNode).insertAfter($injectedNode);
+					// Add left half of text node
+					node.nodeValue = originalText.slice(0, nodeOffset);
+					// Insert element
+					var $injectedNode = $(elementToInject).insertAfter(node);
+					// Add remaining text node
+					var $endNode = $(document.createTextNode(originalText.slice(nodeOffset, originalText.length)));
+					$endNode.insertAfter($injectedNode);
 
 					return $injectedNode;
-				}
-				else {
-
-					currTextPosition = currTextPosition + currNodeMaxIndex;
+				} else {
+					currentTextPosition = endTextPosition;
 				}
 			}
 		}
