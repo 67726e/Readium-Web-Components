@@ -32,7 +32,10 @@ EpubReader.LoadStrategy = Backbone.Model.extend({
 			event.preventDefault();
 
 			var $target = $(event.currentTarget);
-			var targetUrl = $target.attr("href");
+			// Split on `#` to remove the possible ID in the URL
+			var urlParts = $target.attr("href").split("#");
+			var targetUrl = urlParts[0];
+			var targetId = urlParts[1];
 			var uri = new URI(targetUrl);
 
 			// Only try to validate a link if the target element has an href
@@ -43,7 +46,11 @@ EpubReader.LoadStrategy = Backbone.Model.extend({
 					var spineIndex = this.getSpineIndexForUrl(targetUrl, currentUrl);
 
 					if (spineIndex >= 0) {
-						return epubReaderView.showSpineItem(spineIndex, function() {}, this);
+						if (targetId) {
+							return epubReaderView.showPageByElementId(spineIndex, targetId, function() {}, this);
+						} else {
+							return epubReaderView.showSpineItem(spineIndex, function() {}, this);
+						}
 					}
 				}
 
