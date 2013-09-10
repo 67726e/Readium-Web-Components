@@ -72,6 +72,9 @@ var EpubReaderModule = function(readerBoundElement, epubSpineInfo, viewerSetting
         customize : function (customProperty, styleNameOrCSS) {
             epubReaderView.customize(customProperty, styleNameOrCSS);
             return this;
-        }
-    };
+        },
+		isSpineItemVisible: function(cfi) {
+			return epubReaderView.isSpineItemVisible(cfi);
+		}
+	};
 };

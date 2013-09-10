@@ -268,6 +268,14 @@ EpubReader.EpubReaderView = Backbone.View.extend({
         }
     },
 
+	isSpineItemVisible : function(cfi) {
+		var contentDocumentHref = this.cfi.getContentDocHref(cfi, this.packageDocumentDOM);
+		var spineIndex = this.reader.findSpineIndex(contentDocumentHref);
+
+		// True if the spine index for the CFI matches the current spine index
+		return this.reader.attributes.currentPagesViewIndex === spineIndex;
+	},
+
     // ----------------------- Private Helpers -----------------------------------------------------------
 
     getSpineIndexFromCFI : function (CFI) {
