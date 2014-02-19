@@ -212,7 +212,8 @@ EpubReflowable.ReflowablePaginator = Backbone.Model.extend({
 
         this.frame_width = parseInt($frame.width(), 10);
         this.frame_height = parseInt($frame.height(), 10);
-        this.gap_width = Math.floor(this.frame_width / 10);
+//        this.gap_width = Math.floor(this.frame_width / 10);
+		this.gap_width = 25;
         this.padding_width = Math.floor(this.gap_width / 2);
 
         if (isTwoUp) {
