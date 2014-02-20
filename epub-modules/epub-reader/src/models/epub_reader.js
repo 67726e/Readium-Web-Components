@@ -91,7 +91,16 @@ EpubReader.EpubReader = Backbone.Model.extend({
                         pagesView.on(eventInfo.eventName, eventInfo.callback, eventInfo.callbackContext);
                     });
 
-                    callback.call(callbackContext, pagesView);
+					// Rationale: Setting the image to this max-height will prevent it from being cut
+					// on Webkit based browsers. Currently, images extending higher than the viewport
+					// will be cut and moved onto the next column when in the two-up view
+					var $currentFrame = $("iframe").filter(":visible").first();
+					$currentFrame.contents().find("img").css({
+						maxHeight: $currentFrame.height() - 10 + "px",
+						maxWidth: $currentFrame.width() - 10 + "px"
+					});
+
+					callback.call(callbackContext, pagesView);
                 }, this);
 
                 $(this.get("parentElement")).append(pagesView.render(false, undefined));

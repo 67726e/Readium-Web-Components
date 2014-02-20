@@ -1,5 +1,9 @@
 {
     "library_epubs" : [
+		{
+			"title": "Aardvark Trouble",
+			"url_to_package_doc": "../epub_samples_project/trouble/OPS/content.opf"
+		},
         {
             "title" : "Accessible EPUB 3",
             "url_to_package_doc" : "../epub_samples_project/accessible_epub_3-20121024/EPUB/package.opf"
