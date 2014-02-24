@@ -77,9 +77,9 @@ EpubReader.EpubReader = Backbone.Model.extend({
                 pagesView.showPagesView();
                 this.applyPreferences(pagesView);
                 this.fitCurrentPagesView();
+				this.fitImagesToViewport();
                 callback.call(callbackContext, pagesView);
-            }
-            else {
+            } else {
                 
                 // Invoke callback when the content document loads
                 pagesView.on("contentDocumentLoaded", function (result) {
@@ -91,14 +91,7 @@ EpubReader.EpubReader = Backbone.Model.extend({
                         pagesView.on(eventInfo.eventName, eventInfo.callback, eventInfo.callbackContext);
                     });
 
-					// Rationale: Setting the image to this max-height will prevent it from being cut
-					// on Webkit based browsers. Currently, images extending higher than the viewport
-					// will be cut and moved onto the next column when in the two-up view
-					var $currentFrame = $("iframe").filter(":visible").first();
-					$currentFrame.contents().find("img").css({
-						maxHeight: $currentFrame.height() - 10 + "px",
-						maxWidth: $currentFrame.width() - 10 + "px"
-					});
+					that.fitImagesToViewport();
 
 					callback.call(callbackContext, pagesView);
                 }, this);
@@ -109,6 +102,17 @@ EpubReader.EpubReader = Backbone.Model.extend({
             }
         }
     },
+
+	// Rationale: Setting the image to this max-height will prevent it from being cut
+	// on Webkit based browsers. Currently, images extending higher than the viewport
+	// will be cut and moved onto the next column when in the two-up view
+	fitImagesToViewport: function() {
+		var $currentFrame = $("iframe").filter(":visible").first();
+		$currentFrame.contents().find("img").css({
+			maxHeight: $currentFrame.height() - 10 + "px",
+			maxWidth: $currentFrame.width() - 10 + "px"
+		});
+	},
 
     renderNextPagesView : function (callback, callbackContext) {
 		var that = this;
@@ -212,7 +216,8 @@ EpubReader.EpubReader = Backbone.Model.extend({
 
         if (heightIsDifferent || widthIsDifferent) {
             this.setLastRenderSize(currPagesViewInfo, readerElementHeight, readerElementWidth);
-            currPagesViewInfo.pagesView.resizeContent();
+			currPagesViewInfo.pagesView.resizeContent();
+			this.fitImagesToViewport();
         }
     },
 
