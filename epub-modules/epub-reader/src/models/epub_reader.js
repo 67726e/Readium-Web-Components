@@ -108,9 +108,16 @@ EpubReader.EpubReader = Backbone.Model.extend({
 	// will be cut and moved onto the next column when in the two-up view
 	fitImagesToViewport: function() {
 		var $currentFrame = $("iframe").filter(":visible").first();
+
+		// The available width for an image is half of the width when in "synthetic" two column mode
+		// Or the entire frame when in normal mode
+		var maxWidth = (this.attributes.viewerSettings.syntheticLayout) ? $currentFrame.width() / 2 : $currentFrame.width();
+
 		$currentFrame.contents().find("img").css({
-			maxHeight: $currentFrame.height() - 10 + "px",
-			maxWidth: $currentFrame.width() - 10 + "px"
+			maxHeight: $currentFrame.height() - 25 + "px",
+			maxWidth: maxWidth - 25 + "px",
+			height: "auto",
+			width: "auto"
 		});
 	},
 
