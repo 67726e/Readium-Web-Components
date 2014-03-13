@@ -92,6 +92,7 @@ EpubReader.EpubReader = Backbone.Model.extend({
                     });
 
 					that.fitImagesToViewport();
+					that.centerCover();
 
 					callback.call(callbackContext, pagesView);
                 }, this);
@@ -121,7 +122,19 @@ EpubReader.EpubReader = Backbone.Model.extend({
 		});
 	},
 
-    renderNextPagesView : function (callback, callbackContext) {
+	// Attempt to find the cover and center the images within
+	centerCover: function() {
+		if (this.attributes.currentPagesViewIndex === 0 && typeof packageDocumentJson.metadata.cover_href === "string") {
+			var $currentFrame = $("iframe").filter(":visible").first();
+
+			$currentFrame.contents().find("img").filter("[src=" + packageDocumentJson.metadata.cover_href + "]").css({
+				display: "block",
+				margin: "0 auto"
+			});
+		}
+	},
+
+	renderNextPagesView : function (callback, callbackContext) {
 		var that = this;
         var nextPagesViewIndex = this.get("currentPagesViewIndex") + 1;
 

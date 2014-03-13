@@ -83,7 +83,7 @@ RJSDemoApp.loadAndRenderEpub = function (packageDocumentURL, viewerPreferences) 
 			var spineInfo = RJSDemoApp.epub.getSpineInfo();
 
 			RJSDemoApp.epubViewer = new EpubReaderModule(
-				elementToBindReaderTo, spineInfo, viewerPreferences, RJSDemoApp.epub.getPackageDocumentDOM(), "lazy"
+				elementToBindReaderTo, spineInfo, viewerPreferences, packageDocumentObject, RJSDemoApp.epub.getPackageDocumentDOM(), "lazy"
 			);
 
 			// Set the TOC

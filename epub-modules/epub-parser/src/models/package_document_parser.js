@@ -28,6 +28,7 @@ EpubParser.PackageDocumentParser = Backbone.Model.extend({
         json.bindings = this.getJsonBindings(xmlDom);
         json.spine = this.getJsonSpine(xmlDom);
         json.manifest = this.getJsonManifest(xmlDom);
+		json.guide = this.getJsonGuide(xmlDom);
 
         // parse the page-progression-direction if it is present
         json.paginate_backwards = this.paginateBackwards(xmlDom);
@@ -149,6 +150,25 @@ EpubParser.PackageDocumentParser = Backbone.Model.extend({
 
         return jsonBindings;
     },
+
+	getJsonGuide : function() {
+		var xmlDom = this.get("xmlDom");
+		var $references = $("guide", xmlDom).first().children("reference");
+		var guide = [];
+
+		$references.each(function(index, reference) {
+			var $reference = $(reference);
+
+			guide.push({
+				type: $reference.attr("type") || "",
+				title: $reference.attr("title") || "",
+				href: $reference.attr("href") || ""
+			});
+		});
+
+
+		return guide;
+	},
 
     getCoverHref : function() {
 
